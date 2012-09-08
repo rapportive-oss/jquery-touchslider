@@ -1,4 +1,4 @@
-/*global Zepto, setTimeout*/
+/*global window*/
 (function ($) {
     /**
      * Cubic Bezier CSS3 transitions emulator
@@ -24,11 +24,11 @@
             return t * (Cy + t * (By + t * Ay));
         }
 
-        // using Newton's method to aproximate the parametric value of x for t
         function bezier_x_der(t) {
             return Cx + t * (2 * Bx + 3 * Ax * t);
         }
 
+        // using Newton's method to aproximate the parametric value of x for t
         function find_x_for(t) {
             var x = t,
                 i = 0, z;
@@ -94,7 +94,7 @@
         return bezier(t, x, sameness, 1.0);
     }
 
-    $.fn.ipadSlider = function (options) {
+    $.fn.touchSlider = function (options) {
         var x, t, initial_x,
             previous_x, previous_t,
             $this = this,
@@ -107,6 +107,8 @@
             right_edge = slide_width * last_slide;
 
         this.bind('touchstart', function (e) {
+            e = e.originalEvent || e;
+
             if (e.touches.length !== 1) {
                 return;
             }
@@ -130,8 +132,8 @@
             initial_x = previous_x = x = e.touches[0].clientX;
             initial_t = previous_t = t = new Date();
 
-
         }).on('touchmove', function (e) {
+            e = e.originalEvent || e;
 
             if (e.touches.length !== 1) {
                 return;
@@ -158,7 +160,6 @@
             });
 
         }).on('touchend', function (e) {
-
             var target_slide, target_distance, velocity;
 
             // Was the user dragging this thing around speculatively?
@@ -191,6 +192,7 @@
             }
 
             $this.trigger('slideTo', {slide: target_slide, bezier: bezier_for_velocity(velocity)});
+
         }).on('slideTo', function (e, opts) {
             target_offset = opts.slide * slide_width;
 
@@ -207,11 +209,11 @@
             });
 
             $this.trigger('slidingTo', opts.slide);
-            setTimeout(function () {
+            window.setTimeout(function () {
                 $this.trigger('slidTo', opts.slide);
-            }, 500);
+            }, animation_duration);
 
         });
         return this;
     };
-}(Zepto));
+}(window.jQuery || window.Zepto));

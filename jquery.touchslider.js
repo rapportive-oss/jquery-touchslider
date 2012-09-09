@@ -89,6 +89,11 @@
     //
     // At the moment I'm using 't' for that, because it seems to result in
     // consistently smooth-feeling curves; but it's just an arbitrary choice.
+    //
+    // http://www.roblaplaca.com/examples/bezierBuilder/ is invaluable for
+    // getting a feel for bezier curves, though note that it doesn't allow
+    // -ve values for x. We do use those to allow a small amount of bounce if
+    // the user flicks off the end of the slideshow.
     function bezier_for_velocity(v) {
         var importance = 0.5,
             x = Math.sqrt(importance * importance * (v * v / (1 + v * v))),

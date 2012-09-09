@@ -184,21 +184,19 @@
             });
 
         }).on('touchend', function (e) {
-            var target_slide, target_distance, velocity;
+            var target_slide, target_distance, velocity, final_destination;
 
-            // Was the user dragging this thing around speculatively?
-            if (t - initial_t > 250) {
-                target_slide = Math.round(current_offset / slide_width);
+            final_destination = current_offset;
 
-            // If not, which way did they flick?
-            // Leave a bit of freedom so a downward flick does nothing.
-            } else if (Math.abs(initial_x - x) < 20) {
-                target_slide = initial_slide;
-            } else if (x > initial_x) {
-                target_slide = initial_slide - 1;
-            } else {
-                target_slide = initial_slide + 1;
+            // Move up to half an extra slide in the direction of current motion.
+            // TODO: this will feel much nicer once we have bouncing.
+            if (Math.abs(t - previous_t) > 1) {
+                final_destination += Math.min(slide_width / 2, Math.max(-slide_width / 2,
+                                        default_duration * (previous_x - x) / (t - previous_t)
+                                     ));
             }
+
+            target_slide = Math.round(final_destination / slide_width);
 
             if (target_slide < 0) {
                 target_slide = 0;

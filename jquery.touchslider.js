@@ -1,4 +1,8 @@
 /*global window*/
+/*
+ * jQuery.touchSlider.js © 2012 MIT — The Rapportive Team <conrad@rapportive.com>
+ * See https://github.com/rapportive-oss/jquery-touchslider for details.
+ */
 (function ($) {
     /**
      * Cubic Bezier CSS3 transitions emulator
@@ -94,17 +98,29 @@
         return bezier(t, x, sameness, 1.0);
     }
 
-    $.fn.touchSlider = function (options) {
+    $.fn.touchSlider = function () {
         var x, t, initial_x,
             previous_x, previous_t,
             $this = this,
+            slides = this.find(".slides"),
             initial_t, initial_slide,
             current_offset = 0, initial_offset,
             target_offset = 0,
             animation_start, animation_duration, animation_timing_function,
-            slide_width = options.slide_width, last_slide = options.n_slides - 1,
+            slide_width = this.width(), last_slide = this.find(".slide").length - 1,
             left_edge = 0,
             right_edge = slide_width * last_slide;
+
+        slides.css({
+            'width': (slide_width * this.find(".slide").length) + 'px',
+            '-webkit-transition-property': '-webkit-transform',
+            '-webkit-transition-duration': '0.5s',
+            '-webkit-transition-timing-function': 'ease',
+            '-webkit-transform': 'translate3D(0, 0, 0)'
+        });
+        this.css({
+            'overflow': 'hidden'
+        });
 
         this.bind('touchstart', function (e) {
             e = e.originalEvent || e;
@@ -121,7 +137,7 @@
                 current_offset = target_offset;
             }
 
-            $this.css({
+            slides.css({
                 // Remove the delay on animation for instant finger feedback
                 '-webkit-transition-duration': '0s',
                 '-webkit-transform': 'translate3D(' + (0 - current_offset) + 'px, 0, 0)'
@@ -155,7 +171,7 @@
                 current_offset = right_edge + (current_offset - right_edge) / 2;
             }
 
-            $this.css({
+            slides.css({
                 '-webkit-transform': 'translate3D(' + (0 - current_offset) + 'px, 0, 0)'
             });
 
@@ -202,7 +218,7 @@
             animation_start = new Date();
             animation_timing_function = opts.bezier || bezier_for_velocity(0.1);
 
-            $this.css({
+            slides.css({
                 '-webkit-transition-timing-function': animation_timing_function.toCSS(),
                 '-webkit-transition-duration': animation_duration + 'ms',
                 '-webkit-transform': 'translate3D(' + (0 - target_offset) + 'px, 0, 0)'

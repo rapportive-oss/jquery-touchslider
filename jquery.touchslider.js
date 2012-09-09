@@ -90,13 +90,12 @@
     // At the moment I'm using 't' for that, because it seems to result in
     // consistently smooth-feeling curves; but it's just an arbitrary choice.
     //
-    // http://www.roblaplaca.com/examples/bezierBuilder/ is invaluable for
-    // getting a feel for bezier curves, though note that it doesn't allow
-    // -ve values for x. We do use those to allow a small amount of bounce if
-    // the user flicks off the end of the slideshow.
+    // http://cubic-bezier.com/ is useful for getting an intuitive feel for
+    // this. Also note that webkit doesn't support "bouncey" transitions
+    // (with points outside the (0, 0) <-> (1, 1) range) as of iOS 5.
     function bezier_for_velocity(v) {
         var importance = 0.5,
-            x = Math.sqrt(importance * importance * (v * v / (1 + v * v))),
+            x = (v < 0 ? -1 : 1) * Math.sqrt(importance * importance * (v * v / (1 + v * v))),
             t = x / v,
             sameness = t;
 
@@ -114,6 +113,7 @@
             animation_start, animation_duration, animation_timing_function,
             slide_width = this.width(), last_slide = this.find(".slide").length - 1,
             left_edge = 0,
+            default_duration = 500,
             right_edge = slide_width * last_slide;
 
         this.css({
@@ -205,13 +205,13 @@
                 target_slide = last_slide;
             }
 
-            target_distance = target_slide * slide_width - current_offset;
+            target_distance = current_offset - target_slide * slide_width;
 
             // avoid division by zero
             if (Math.abs(x - previous_x) < 1 || Math.abs(t - previous_t) < 1) {
                 velocity = 0.1;
             } else {
-                velocity = ((x - previous_x) / (t - previous_t));
+                velocity = ((x - previous_x) / (t - previous_t)) * (default_duration / target_distance);
             }
 
             $this.trigger('slideTo', {slide: target_slide, bezier: bezier_for_velocity(velocity)});
@@ -221,7 +221,7 @@
 
             // NOTE: 0.01s > 0s, if we set it to 0 then the transition doesn't happen
             // if the first time the thing is shown is with animate:false.
-            animation_duration = (opts.animate === false ? 1 : 500);
+            animation_duration = (opts.animate === false ? 1 : default_duration);
             animation_start = new Date();
             animation_timing_function = opts.bezier || bezier_for_velocity(0.1);
 

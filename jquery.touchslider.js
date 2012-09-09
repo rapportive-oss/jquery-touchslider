@@ -110,7 +110,7 @@
             initial_t, initial_slide,
             current_offset = 0, initial_offset,
             target_offset = 0,
-            animation_start, animation_duration, animation_timing_function,
+            animation = {},
             slide_width = this.width(), last_slide = this.find(".slide").length - 1,
             left_edge = 0,
             default_duration = 500,
@@ -137,9 +137,9 @@
             }
 
             // Allow the user to interrupt our animation.
-            var t = new Date() - animation_start;
-            if (animation_start && t < animation_duration) {
-                current_offset += animation_timing_function(t / animation_duration) * (target_offset - current_offset);
+            var t = new Date() - animation.start;
+            if (animation && t < animation.duration) {
+                current_offset += animation.bezier(t / animation.duration) * (target_offset - current_offset);
             } else {
                 current_offset = target_offset;
             }
@@ -219,22 +219,24 @@
         }).on('slideTo', function (e, opts) {
             target_offset = opts.slide * slide_width;
 
-            // NOTE: 0.01s > 0s, if we set it to 0 then the transition doesn't happen
-            // if the first time the thing is shown is with animate:false.
-            animation_duration = (opts.animate === false ? 1 : default_duration);
-            animation_start = new Date();
-            animation_timing_function = opts.bezier || bezier_for_velocity(0.1);
+            animation = {
+                slide: opts.slide,
+                // webkit doesn't perform the transition if the duration is 0 and the slider is offscreen
+                duration: Math.max(typeof opts.duration === 'undefined' ? default_duration : opts.duration, 1),
+                start: new Date(),
+                bezier: opts.bezier || bezier_for_velocity(0.1)
+            };
 
             slides.css({
-                '-webkit-transition-timing-function': animation_timing_function.toCSS(),
-                '-webkit-transition-duration': animation_duration + 'ms',
+                '-webkit-transition-timing-function': animation.bezier.toCSS(),
+                '-webkit-transition-duration': animation.duration + 'ms',
                 '-webkit-transform': 'translate3D(' + (0 - target_offset) + 'px, 0, 0)'
             });
 
-            $this.trigger('slidingTo', opts.slide);
+            $this.trigger('slidingTo', animation);
             window.setTimeout(function () {
-                $this.trigger('slidTo', opts.slide);
-            }, animation_duration);
+                $this.trigger('slidTo', animation);
+            }, animation.duration);
 
         });
         return this;

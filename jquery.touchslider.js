@@ -111,15 +111,17 @@
             left_edge = 0,
             right_edge = slide_width * last_slide;
 
+        this.css({
+            'overflow': 'hidden'
+        });
         slides.css({
             'width': (slide_width * this.find(".slide").length) + 'px',
             '-webkit-transition-property': '-webkit-transform',
-            '-webkit-transition-duration': '0.5s',
-            '-webkit-transition-timing-function': 'ease',
             '-webkit-transform': 'translate3D(0, 0, 0)'
         });
-        this.css({
-            'overflow': 'hidden'
+        // Force slides into texture buffers on the iPad
+        slides.find(".slide").css({
+            '-webkit-transform': 'translate3D(0, 0, 0)'
         });
 
         this.bind('touchstart', function (e) {

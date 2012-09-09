@@ -139,6 +139,7 @@
             // Allow the user to interrupt our animation.
             var t = new Date() - animation.start;
             if (animation && t < animation.duration) {
+                window.clearTimeout(animation.timeout);
                 current_offset += animation.bezier(t / animation.duration) * (target_offset - current_offset);
             } else {
                 current_offset = target_offset;
@@ -234,7 +235,7 @@
             });
 
             $this.trigger('slidingTo', animation);
-            window.setTimeout(function () {
+            animation.timeout = window.setTimeout(function () {
                 $this.trigger('slidTo', animation);
             }, animation.duration);
 

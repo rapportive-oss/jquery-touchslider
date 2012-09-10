@@ -27,7 +27,7 @@
 </defs>
 <g style="fill:none; color:white; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
 	<g transform="translate(400.0,22.5)" style="stroke:none; fill:black; font-family:Arial; font-size:12.00pt; text-anchor:middle">
-		<text>Transition between user movement and animation</text>
+		<text></text>
 	</g>
 </g>
 <g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
@@ -400,7 +400,7 @@
 	<a xlink:title="Plot #1">
 <g style="fill:none; color:red; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
 	<g transform="translate(698.9,310.9)" style="stroke:none; fill:black; font-family:Arial; font-size:12.00pt; text-anchor:end">
-		<text>calculated bezier</text>
+		<text>Calculated Bezier</text>
 	</g>
 	<path  d='M707.2,306.4 L749.4,306.4 M555.9,259.6 L556.9,256.7 L557.9,253.7 L558.9,250.7 L559.8,247.7 L560.7,244.7 
 		L561.6,241.7 L562.5,238.7 L563.4,235.7 L564.3,232.7 L565.2,229.7 L566.1,226.7 L566.9,223.7 L567.8,220.7 

@@ -151,10 +151,10 @@ set loadpath
 set fontpath 
 set fit noerrorvariables
 GNUTERM = "wxt"
-set multiplot title "Transition between user movement and animation" layout 1,2
+set multiplot title "" layout 1,2
 plot [-0.4:1][-0.4:1] "ease.txt" sm bezier title "CSS 'ease'", "user.txt" w l title "User velocity"
 unset label
 set label 1 "C(1) continuous" at -0.3, 0.23, 0 left norotate back nopoint offset character 0, 0, 0
-plot [-0.4:1][-0.4:1] "correct.txt" sm bezier title "calculated bezier", "user.txt" w l title "User velocity"
+plot [-0.4:1][-0.4:1] "correct.txt" sm bezier title "Calculated Bezier", "user.txt" w l title "User velocity"
 unset multiplot
 #    EOF

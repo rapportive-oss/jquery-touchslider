@@ -4,59 +4,6 @@
  * See https://github.com/rapportive-oss/jquery-touchslider for details.
  */
 (function ($) {
-    /**
-     * Cubic Bezier CSS3 transitions emulator
-     *
-     * See this post for more details
-     * http://st-on-it.blogspot.com/2011/05/calculating-cubic-bezier-function.html
-     *
-     * Copyright (C) 2011 Nikolay Nemshilov
-     */
-    function bezier(p1, p2, p3, p4) {
-        // defining the bezier functions in the polynomial form
-        var Cx = 3 * p1,
-            Bx = 3 * (p3 - p1) - Cx,
-            Ax = 1 - Cx - Bx,
-            Cy = 3 * p2,
-            By = 3 * (p4 - p2) - Cy,
-            Ay = 1 - Cy - By;
-
-        function bezier_x(t) {
-            return t * (Cx + t * (Bx + t * Ax));
-        }
-        function bezier_y(t) {
-            return t * (Cy + t * (By + t * Ay));
-        }
-
-        function bezier_x_der(t) {
-            return Cx + t * (2 * Bx + 3 * Ax * t);
-        }
-
-        // using Newton's method to aproximate the parametric value of x for t
-        function find_x_for(t) {
-            var x = t,
-                i = 0, z;
-
-            while (i < 5) { // making 5 iterations max
-                z = bezier_x(x) - t;
-                if (Math.abs(z) < 1e-3) {
-                    break; // if already got close enough
-                }
-                x = x - z / bezier_x_der(x);
-                i += 1;
-            }
-            return x;
-        }
-
-        function ret(t) {
-            return bezier_y(find_x_for(t));
-        }
-        ret.toCSS = function () {
-            return "cubic-bezier(" + [p1, p2, p3, p4].join(", ") + ")";
-        };
-        return ret;
-    }
-
     // Given that the user is moving the slides at a given velocity,
     // what should the bezier curve animation look like?
     //
@@ -99,7 +46,7 @@
             t = x / v,
             sameness = t;
 
-        return bezier(t, x, sameness, 1.0);
+        return 'cubic-bezier(' + [t, x, sameness, 1.0].join(", ") + ')';
     }
 
     $.fn.touchSlider = function () {
@@ -136,14 +83,10 @@
                 return;
             }
 
-            // Allow the user to interrupt our animation.
-            var t = new Date() - animation.start;
-            if (animation && t < animation.duration) {
-                window.clearTimeout(animation.timeout);
-                current_offset += animation.bezier(t / animation.duration) * (target_offset - current_offset);
-            } else {
-                current_offset = target_offset;
-            }
+            // Ensure that if the user stops the animation half way through, our internal
+            // state is correct.
+            // getComputedStyle seems to always return the result in the form: matrix(0, 0, 0, 0, X, 0)
+            current_offset = 0 - Number(window.getComputedStyle(slides[0])['-webkit-transform'].split(", ")[4]);
 
             slides.css({
                 // Remove the delay on animation for instant finger feedback
@@ -227,7 +170,7 @@
             };
 
             slides.css({
-                '-webkit-transition-timing-function': animation.bezier.toCSS(),
+                '-webkit-transition-timing-function': animation.bezier,
                 '-webkit-transition-duration': animation.duration + 'ms',
                 '-webkit-transform': 'translate3D(' + (0 - target_offset) + 'px, 0, 0)'
             });

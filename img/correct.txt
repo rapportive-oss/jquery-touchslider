@@ -1,0 +1,5 @@
+# Calcluated smooth function
+0.0 0.0
+0.158 0.474
+0.158 1.0
+1 1.0

@@ -63,18 +63,15 @@ $('.slider').on('slidTo', function (e, animation) {
 Implementation
 ==============
 
-It exists not because there aren't many alternatives, but because it uses some fun
-techniques to get fast responsive scrolling.
+TouchSlider exists not because there aren't many alternatives, but because it uses some
+fun techniques to get smooth responsive scrolling.
 
 ### Graphics hardware pre-loading
 
-Every slider worth its salt is already doing this, but here are the details:
-
-When the slider is initialized, we push both the slides container, and each slide
-individually into the texture buffer. If you don't put the slides container there, then
-the first time the user touches the slider, they'll see graphical glitches; and if you
-don't put each slide individually then they'll see graphical glitches the first time a new
-slide is shown.
+When building websites with hardware accelerated graphics for the iPad it's always a
+necessity to push the elements you are going to animate onto the graphics hardware eagerly.
+In this case we actually need to do this both for the slides container, and also for each
+individual slide.
 
 ```css
 .slides, .slides .slide {
@@ -82,45 +79,52 @@ slide is shown.
 }
 ```
 
+The slides container is what we're actually going to be animating, but
+without encouragement the iPad will only pre-buffer the visible section of it, setting a
+null transform on each individual slide removes the tearing effect you otherwise get as a
+slide becomes visible for the first time.
+
 ### CSS transitions
 
 The most important part of implementing a slider like this is getting the behaviour right
-when the user lifts their finger from the screen. Before that point, you can just update
-the `-webkit-transform` in response to finger movement; after that point you are on your
-own.
+when the user lifts their finger from the screen. Before that point, the position of the
+slides can be set manually by javascript in response to `touchmove`, after that point it's
+necessary to guess at what the user expects.
 
-There are two ways to do this, either try to calculate a custom function in javascript, or
-use the built-in CSS smoothing functions.  The problem with calculating a custom function
-is that it's very hard to make it smooth enough that the user cannot notice each frame of
-your animation, the problem with CSS smoothing functions seems to mainly be "that's not
-how Apple does it", but I can live with that :).
+The only performant way to do this is to use a CSS transition or animation, trying to use
+javascript is not nearly fast enough to maintain the illusion of smoothness. While
+using CSS animation could give you precise pixel-by-pixel deceleration, it turns out that
+using a carefully chosen transition leads to an effect that is just as nice, and is
+considerably less effort.
 
 ### Curve joining
 
-There's actually a second problem with using CSS smoothing functions, which is much more
-subtle. If you just use a random cubic-bezier (say the built in `ease` transition), then
-there's an unpleasant discontinuity when the finger is lifted.
+There is one main issue with using CSS transitions after the user has let go of the
+slide: unless you choose your transition carefully, there will be an unpleasant bump at
+the point that the finger leaves the screen.
 
-This is because the user is moving the slide at a particular velocity, and the Bezier
-curve also starts with a particular velocity; and if those two don't match up, then it
-creates a noticeable "bump" as you transition between manual control and animation.
+This is because the user is moving the slide at a particular velocity in order to drag it
+out of the way, and the browser's CSS engine is also moving the slide at a particular
+velocity defined by the choice of Bezier curve. Unless these two velocities match exactly
+the user will experience a [C(1)
+discontinuity](http://en.wikipedia.org/wiki/Smooth_function#Parametric_continuity), which
+is subliminally distressing.
 
-Thankfully this is possible to fix by measuring the velocity at which the user is moving the
-slide and calculating a custom cubic-bezier easing function that starts with the correct
-velocity. Mathematicians call this [C(1) continuity](http://en.wikipedia.org/wiki/Smooth_function#Parametric_continuity).
+Luckily the way Bezier curves are constructed makes it possible to avoid this case. In CSS
+the velocity of a transition is proportional to the gradient of the Bezier curve; and the
+gradient at the start of the curve `cubic-bezier(a, b, c, d)` a is `a / b`. So all we have
+to do to ensure a smooth user experience is measure the velocity at which the user is moving
+the slide, and ensure that `a / b` is equal to that.
 
-In CSS, the gradient of the Bezier curve is the velocity of the transition, and the
-gradient at the start of a curve `cubic-bezier(a, b, c, d)` is `a / b`; so when choosing
-the curve, we make sure that `a / b` has the correct value.
 ![Bezier function comparison](http://code.rapportive.com/jquery-touchslider/img/continuity.svg)
 
-We also set `d` equal to 1,
-which ensures the transition stops smoothly. The only other constraints on the Bezier
-curve choice is that they should feel natural and consistent, i.e. no matter what the
-initial velocity, the curve should feel good; and at all velocities the user should feel
-that the curves are similar.
+To make the animation stop smoothly, we also set `d` equal to 1; this makes the final
+velocity hit 0 at the same time as the animation stops. The other constraints on the
+curve choice are a bit more nebulous: it should feel smooth at any speed, and different
+curves at different speeds should feel similar. The current model we're using does a
+reasonable job, but it was guessed more than calculated.
 
-### Interruptable animations
+### Interruptible animations
 
 It's vital when you are animating a transition that the user started to allow them to
 stop it again by just grabbing at the slide. If you don't take care about this then when
@@ -128,10 +132,12 @@ the user tries to stop the animation, it will jump to the last frame (you can se
 with Apple scrolling when you drag a web-page beyond the end, let go and immediately try
 to catch it, it's quite jarring).
 
-Thankfully the browser implementors have our back with the [getComputedStyle](https://developer.mozilla.org/en-US/docs/DOM/window.getComputedStyle)
-function. In order to allow the user to catch the slide as it animates, we check where the
-slide actually is using `getComputedStyle`. Then we can stop the animation without it
-jumping to the end.
+Thankfully the browser implementors have thought of this and provided the
+[getComputedStyle](https://developer.mozilla.org/en-US/docs/DOM/window.getComputedStyle)
+function. In order to allow the user to grab the slide while it's animating, we check
+where the slide actually is using `getComputedStyle` on the `touchstart` event.
+Then we can stop the animation and set the current position explicitly so that there is no jump
+moving back into manual mode.
 
 ## Apple scrolling?
 
@@ -153,4 +159,3 @@ point support](https://bugs.webkit.org/show_bug.cgi?id=45761); the latter will r
 both a fixed WebKit and a new family of Bezier deceleration curves.
 
 As always, bug reports and pull requests are welcome.
-

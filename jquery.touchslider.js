@@ -50,17 +50,17 @@
     }
 
     $.fn.touchSlider = function () {
-        var x, t, initial_x,
+        var x, t,
+            initial_x, initial_offset,
             previous_x, previous_t,
+            current_offset = 0,
             $this = this,
             slides = this.find(".slides"),
-            initial_t, initial_slide,
-            current_offset = 0, initial_offset,
-            target_offset = 0,
             animation = {},
-            slide_width = this.width(), last_slide = this.find(".slide").length - 1,
-            left_edge = 0,
             default_duration = 500,
+            slide_width = this.width(),
+            last_slide = this.find(".slide").length - 1,
+            left_edge = 0,
             right_edge = slide_width * last_slide;
 
         this.css({
@@ -95,9 +95,8 @@
             });
 
             initial_offset = current_offset;
-            initial_slide = Math.floor(target_offset / slide_width);
             initial_x = previous_x = x = e.touches[0].clientX;
-            initial_t = previous_t = t = new Date();
+            previous_t = t = new Date();
 
         }).on('touchmove', function (e) {
             e = e.originalEvent || e;
@@ -159,13 +158,12 @@
             $this.trigger('slideTo', {slide: target_slide, bezier: bezier_for_velocity(velocity)});
 
         }).on('slideTo', function (e, opts) {
-            target_offset = opts.slide * slide_width;
+            var target_offset = opts.slide * slide_width;
 
             animation = {
                 slide: opts.slide,
                 // webkit doesn't perform the transition if the duration is 0 and the slider is offscreen
                 duration: Math.max(typeof opts.duration === 'undefined' ? default_duration : opts.duration, 1),
-                start: new Date(),
                 bezier: opts.bezier || bezier_for_velocity(0.1)
             };
 

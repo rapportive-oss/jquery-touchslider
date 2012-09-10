@@ -158,4 +158,5 @@ The former should already work, but I haven't tested it on a WebKit with [negati
 point support](https://bugs.webkit.org/show_bug.cgi?id=45761); the latter will require
 both a fixed WebKit and a new family of Bezier deceleration curves.
 
-As always, bug reports and pull requests are welcome.
+As always, bug reports and pull requests are welcome; jquery.touchSlider.js is released
+under the MIT license.

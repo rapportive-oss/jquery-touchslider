@@ -101,6 +101,8 @@
         }).on('touchmove', function (e) {
             e = e.originalEvent || e;
 
+            // Allow the user to zoom when they're touching the container by not
+            // preventing default if there's more than one finger.
             if (e.touches.length !== 1) {
                 return;
             } else {

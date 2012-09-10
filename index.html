@@ -1,0 +1,24 @@
+<meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="http://raw.github.com/rapportive-oss/jquery-touchslider/master/jquery.touchslider.js"></script>
+
+<div class="slider" style="width: 800px; font-size: 0">
+    <div class="slides">
+        <div style="margin-left: -560px; height: 600px; vertical-align: top;
+                    width:560px; font-size: 160px; display: inline-block">☺</div>
+        <img class="slide" src="http://www.placehold.it/800x600/222&text=ONE">
+        <img class="slide" src="http://www.placehold.it/800x600/555&text=TWO">
+        <img class="slide" src="http://www.placehold.it/800x600/888&text=THREE">
+        <img class="slide" src="http://www.placehold.it/800x600/AAA&text=FOUR">
+    </div>
+</div>
+
+<script>
+    $(function () {
+        if (navigator.userAgent.match(/iPad|iPhone|iPod/)) {
+            $('.slider').touchSlider();
+        } else {
+            alert('Please come back on your iPad/iPhone: http://bit.ly/tslider');
+        }
+    });
+</script>

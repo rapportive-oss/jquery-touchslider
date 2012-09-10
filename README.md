@@ -63,6 +63,9 @@ $('.slider').on('slidTo', function (e, animation) {
 Implementation
 ==============
 
+Building reactive UI in a touch-sensitive browser takes a bit of attention to detail. The
+most interesting things I learned while doing this are:
+
 ### Graphics hardware pre-loading
 
 When building websites with hardware accelerated graphics for the iPad, it's always a
